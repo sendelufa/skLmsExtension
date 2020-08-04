@@ -17,7 +17,7 @@ var GREETING_FOOTER = "С уважением, Константин";
 var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
 var HOMEWORK_BUTTON_TEXT_HIDE = true; // true - кнопки скрыть показать текст домашнего задания
 var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз на странице проверки работ будет скрыть (работает если HOMEWORK_BUTTON_TEXT_HIDE = true)
-let result = '';
+
 
 (function (window, undefined) {
 
@@ -50,6 +50,7 @@ let result = '';
     var module = module_full.split(':')[0].trim();
     var student = elements[2].innerHTML.split(':')[1].trim();
     var course = elements[0].innerHTML.split(':')[0].trim();
+    let result = '';
 
     reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
