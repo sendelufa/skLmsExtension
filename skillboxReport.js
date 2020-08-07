@@ -18,7 +18,6 @@ var FLOAT_EDITOR_PANEL = false; //  true - панель форматирован
 var HOMEWORK_BUTTON_TEXT_HIDE = true; // true - кнопки скрыть показать текст домашнего задания
 var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз на странице проверки работ будет скрыть (работает если HOMEWORK_BUTTON_TEXT_HIDE = true)
 
-
 (function (window, undefined) {
 
   // normalized window
@@ -52,7 +51,7 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
     var course = elements[0].innerHTML.split(':')[0].trim();
     let result = '';
 
-    reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
+    reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course + "\t" + result;
 
     let articles = $('.comments__add');
 
@@ -109,6 +108,7 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
       }
     });
     inputCopyRowToReport.css("width", "100%");
+    inputCopyRowToReport.attr('id', 'report')
 
     //Обработка кликов на кнопки зачет/незачет
     done.click(function () {
