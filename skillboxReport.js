@@ -94,11 +94,13 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
     done.css({
       'backgroundColor': 'green',
       'color': '#fff',
-      'margin': '10px 10px 0 0'
+      'margin': '0 10px 10px 0',
+      'display': 'inline-block'
     });
     rework.css({
       'backgroundColor': 'red',
-      'color': '#fff'
+      'color': '#fff',
+        'display': 'inline-block'
     });
 
     let inputCopyUrl = $('<input>', {
@@ -123,10 +125,10 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
         $('#sendel-copy-row').append('  строка для отчета скопирована!');
       }
     });
-    inputCopyRowToReport.css("width", "100%");
+    inputCopyRowToReport.css({"width": "100%", 'margin-bottom': '10px'});
     inputCopyRowToReport.attr('id', 'report')
 
-    //Обработка кликов на кнопки заче�/незачет
+    //Обработка кликов на кнопки заче�/незачет
     done.click(function () {
       result = 'зачет'
       generateResultStringAndSend(student, module, result, course);
@@ -139,12 +141,10 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
 
     //appends to containers
     $('<span>', {text: 'Строка для отчета: '})
+          .css({'display': 'block'})
 		  .appendTo(containerRowReport);
-    inputCopyRowToReport.appendTo(containerRowReport);
-
-    $('<span>', {text: 'Ссылка на дз: '})
-		  .appendTo(containerCopyUrl);
-    inputCopyUrl.appendTo(containerCopyUrl);
+    inputCopyRowToReport
+          .appendTo(containerRowReport);
 
     $('<hr>').appendTo(containerMain);
     containerCopyUrl.appendTo(containerMain);
