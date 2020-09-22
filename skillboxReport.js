@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name SkillBoxLessonUrlAndReportRowCopy v0.31
+// @name SkillBoxLessonUrlAndReportRowCopy v0.35
 // @description input for copy url
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
@@ -35,14 +35,16 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
 
   var reportRow = '';
 
-  function generateResultStringAndSend(student, module, result, course) {
+  function generateResultAndCopyToBuffer(student, module, result, course) {
     const reportElement = $('#report');
     reportElement.val(
         todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
         + window.location.href + "\t" + course)
     reportElement.select();
     document.execCommand("copy");
-
+  }
+  
+  function approveHomework() {   
     //Клик на ОТПРАВИТЬ
     setTimeout(function () {
       $('.skillbox-btn.ng-star-inserted').trigger('click');
@@ -52,6 +54,18 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
       $('.skillbox-btn.skillbox-btn_success').trigger('click');
     }, 3000);
   }
+  
+  
+  function rejectHomework() {
+    //Клик на ОТПРАВИТЬ
+    setTimeout(function () {
+      $('.skillbox-btn.ng-star-inserted').trigger('click');
+    }, 1000);
+     //Клик на ОТКЛОНИТЬ
+    setTimeout(function () {
+      $('.skillbox-btn.skillbox-btn_danger').trigger('click');
+    }, 3000);    
+  }  
 
 //generate report string, split with tab
   function generateReportRow(content) {
@@ -130,13 +144,15 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
 
     //Обработка кликов на кнопки заче�/незачет
     done.click(function () {
-      result = 'зачет'
-      generateResultStringAndSend(student, module, result, course);
+      result = 'зачет';
+      generateResultAndCopyToBuffer(student, module, result, course)
+      approveHomework();
     });
 
     rework.click(function () {
-      result = 'незачет'
-      generateResultStringAndSend(student, module, result, course);
+      result = 'незачет';
+      generateResultAndCopyToBuffer(student, module, result, course)
+      rejectHomework();
     });
 
     //appends to containers
@@ -236,3 +252,4 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
   }
 
 })(window);
+
