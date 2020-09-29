@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name SkillBoxLessonUrlAndReportRowCopy v0.35
+// @name SkillBoxLessonUrlAndReportRowCopy 0.37
 // @description input for copy url
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.31
+// @version 0.37
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -14,9 +14,14 @@
 
 var GREETING_TITLE = "Здравствуйте!";
 var GREETING_FOOTER = "С уважением, ";
-var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
-var HOMEWORK_BUTTON_TEXT_HIDE = true; // true - кнопки скрыть показать текст домашнего задания
-var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз на странице проверки работ будет скрыть (работает если HOMEWORK_BUTTON_TEXT_HIDE = true)
+var FLOAT_EDITOR_PANEL = true; //  true - панель форматирования текста будет фиксированная
+
+const button_css = {'color': '#fff',
+      'margin': '0 10px 10px 0',
+      'display': 'inline-block',
+      'min-width':'20px',
+      'height':'25px'
+    };
 
 (function (window, undefined) {
 
@@ -43,8 +48,8 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
     reportElement.select();
     document.execCommand("copy");
   }
-  
-  function approveHomework() {   
+
+  function approveHomework() {
     //Клик на ОТПРАВИТЬ
     setTimeout(function () {
       $('.skillbox-btn.ng-star-inserted').trigger('click');
@@ -54,8 +59,7 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
       $('.skillbox-btn.skillbox-btn_success').trigger('click');
     }, 3000);
   }
-  
-  
+
   function rejectHomework() {
     //Клик на ОТПРАВИТЬ
     setTimeout(function () {
@@ -64,25 +68,16 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
      //Клик на ОТКЛОНИТЬ
     setTimeout(function () {
       $('.skillbox-btn.skillbox-btn_danger').trigger('click');
-    }, 3000);    
-  }  
+    }, 3000);
+  }
 
-//generate report string, split with tab
   function generateReportRow(content) {
+    var module_full = $("app-lesson-subheader-title")[0].innerText;
+    var module = module_full.split(":")[0].replace("Тема ", "");
+    var student = $(".student__info span")[0].innerText;
+    var course = ""; // html don't contains course name
 
-    if (HOMEWORK_BUTTON_TEXT_HIDE && HOMEWORK_TEXT_HIDE) {
-      $(".course_text").css("display", "none");
-    }
-
-    var elements = $(content).find("span");
-    var module_full = elements[1].innerHTML;
-    var module = module_full.split(':')[0].trim();
-    var student = elements[2].innerHTML.split(':')[1].trim();
-    var course = elements[0].innerHTML.split(':')[0].trim();
-    let result = '';
-
-    reportRow = todayDate() + "\t" + student + "\t" + module + "\t" + result
-        + "\t" + window.location.href + "\t" + course;
+    reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
     //create new HTML elements
     let containerMain = $('<div>', {
@@ -95,39 +90,22 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
       id: 'sendel-p-copy-url'
     });
     let done = $('<button>', {
-      text: 'зачет',
+      text: '👍 зачет',
       class: 'skillbox-btn'
     });
     let rework = $('<button>', {
-      text: 'незачет',
+      text: '✖️ незачет',
       class: 'skillbox-btn'
     });
 
+    done.css({'backgroundColor': '#2fa52f'});
+    done.css(button_css);
+
+    rework.css({'backgroundColor': '#f84949'});
+    rework.css(button_css);
+
     done.appendTo(containerRowReport)
     rework.appendTo(containerRowReport)
-    done.css({
-      'backgroundColor': 'green',
-      'color': '#fff',
-      'margin': '0 10px 10px 0',
-      'display': 'inline-block'
-    });
-    rework.css({
-      'backgroundColor': 'red',
-      'color': '#fff',
-        'display': 'inline-block'
-    });
-
-    let inputCopyUrl = $('<input>', {
-      type: 'text',
-      value: window.location.href,
-      name: 'sendel-copy-url',
-      click: function () {
-        this.select();
-        document.execCommand("copy");
-        $('#sendel-p-copy-url').append('  ссылка скопирована!');
-      }
-    });
-    inputCopyUrl.css("width", "100%");
 
     let inputCopyRowToReport = $('<input>', {
       type: 'text',
@@ -142,15 +120,15 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
     inputCopyRowToReport.css({"width": "100%", 'margin-bottom': '10px'});
     inputCopyRowToReport.attr('id', 'report')
 
-    //Обработка кликов на кнопки заче�/незачет
+    //Обработка кликов на кнопки зачет�/незачет
     done.click(function () {
-      result = 'зачет';
+     var result = 'зачет';
       generateResultAndCopyToBuffer(student, module, result, course)
       approveHomework();
     });
 
     rework.click(function () {
-      result = 'незачет';
+     var result = 'незачет';
       generateResultAndCopyToBuffer(student, module, result, course)
       rejectHomework();
     });
@@ -194,34 +172,13 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
       editor_panel.css("boder-color", "#979797");
       editor_panel.css("border-style", "solid");
     }
-
-    if (HOMEWORK_BUTTON_TEXT_HIDE) {
-      let btn_hw_toggle_t = $('<button>', {
-        class: 'sendel-btn-hw-toggle skillbox-btn btn-outline-primary',
-        text: 'Скрыть-показать текст дз / ' + module_full + ' / ' + course
-      });
-      let btn_hw_toggle_f = $('<button>', {
-        class: 'sendel-btn-hw-toggle skillbox-btn btn-outline-primary',
-        text: 'Скрыть-показать текст дз'
-      });
-
-      btn_hw_toggle_t.css("margin", "5px");
-      btn_hw_toggle_t.css("margin", "5px");
-
-      btn_hw_toggle_t.prependTo($(".work__content"));
-      btn_hw_toggle_f.appendTo($(".course_text"));
-
-      $(".sendel-btn-hw-toggle").click(function () {
-        $(".course_text").toggle();
-      });
-    }
   }
 
   // additional url check.
   // Google Chrome do not treat @match as intended sometimes.
   if (/https:\/\/go.skillbox.ru\/homeworks\//.test(w.location.href)) {
     $(document).ready(function () {
-      waitForKeyElements(".work__content", generateReportRow);
+      waitForKeyElements("div.student", generateReportRow);
     });
   }
 
@@ -249,7 +206,7 @@ var HOMEWORK_TEXT_HIDE = true; // true - по умолчанию текст дз
     $('<br>').appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<p>', {text: GREETING_FOOTER + teacher_name}).appendTo(textAreaEditor);
+    document.querySelector('.fr-iframe').contentDocument.querySelector('.fr-view').firstElementChild.remove()
   }
 
 })(window);
-
