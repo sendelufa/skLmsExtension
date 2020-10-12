@@ -172,6 +172,18 @@ const button_css = {'color': '#fff',
       editor_panel.css("boder-color", "#979797");
       editor_panel.css("border-style", "solid");
     }
+
+    if (student) {
+      let gitlabUrl = "https://gitlab.skillbox.ru/search?group_id=&project_id=&repository_ref=&scope=users&search=" + student.replace(" ", "+");
+      let gitlabLink = $('<a>', {
+        text: 'Gitlab search',
+        class: 'info__status skb-p3',
+        href: gitlabUrl,
+        target: '_blank'
+      });
+
+      gitlabLink.appendTo(document.getElementsByClassName("student__info")[0]);
+    }
   }
 
   // additional url check.
