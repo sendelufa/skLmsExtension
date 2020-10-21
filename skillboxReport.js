@@ -1,10 +1,10 @@
 // ==UserScript==
-// @name SkillBoxLessonUrlAndReportRowCopy 0.37
+// @name SkillBoxLessonUrlAndReportRowCopy
 // @description input for copy url
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.37
+// @version 0.40
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -13,15 +13,19 @@
 // do not spoil the global scope
 
 var GREETING_TITLE = "Здравствуйте!";
-var GREETING_FOOTER = "С уважением, ";
-var FLOAT_EDITOR_PANEL = true; //  true - панель форматирования текста будет фиксированная
+var GREETING_FOOTER = "С уважением, Константин";
+var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
 
 const button_css = {'color': '#fff',
-      'margin': '0 10px 10px 0',
+      'margin': '0 10px',
       'display': 'inline-block',
       'min-width':'20px',
-      'height':'25px'
+      'border':'1px solid',
+      'cursor': 'pointer',
+      'padding': '8px 20px'
     };
+
+var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
 (function (window, undefined) {
 
@@ -49,25 +53,26 @@ const button_css = {'color': '#fff',
     document.execCommand("copy");
   }
 
-  function approveHomework() {
+function approveHomework() {
     //Клик на ОТПРАВИТЬ
     setTimeout(function () {
-      $('.skillbox-btn.ng-star-inserted').trigger('click');
+      $('.ui-skb-button--view-1.ng-star-inserted').trigger('click');
     }, 1000);
     //Клик на ПРИНЯТЬ
     setTimeout(function () {
-      $('.skillbox-btn.skillbox-btn_success').trigger('click');
+      $('.ui-skb-button--view-3.ng-star-inserted').trigger('click');
     }, 3000);
   }
 
   function rejectHomework() {
     //Клик на ОТПРАВИТЬ
     setTimeout(function () {
-      $('.skillbox-btn.ng-star-inserted').trigger('click');
+      $('.ui-skb-button--view-1.ng-star-inserted').trigger('click');
     }, 1000);
+
      //Клик на ОТКЛОНИТЬ
     setTimeout(function () {
-      $('.skillbox-btn.skillbox-btn_danger').trigger('click');
+      $('.ui-skb-button--view-2.ng-star-inserted').trigger('click');
     }, 3000);
   }
 
@@ -76,7 +81,7 @@ const button_css = {'color': '#fff',
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = $(".student__info span")[0].innerText;
     var course = ""; // html don't contains course name
-
+    
     reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
     //create new HTML elements
@@ -103,7 +108,7 @@ const button_css = {'color': '#fff',
 
     rework.css({'backgroundColor': '#f84949'});
     rework.css(button_css);
-
+    
     done.appendTo(containerRowReport)
     rework.appendTo(containerRowReport)
 
@@ -120,7 +125,7 @@ const button_css = {'color': '#fff',
     inputCopyRowToReport.css({"width": "100%", 'margin-bottom': '10px'});
     inputCopyRowToReport.attr('id', 'report')
 
-    //Обработка кликов на кнопки зачет�/незачет
+    //Обработка кликов на кнопки зачет/незачет
     done.click(function () {
      var result = 'зачет';
       generateResultAndCopyToBuffer(student, module, result, course)
@@ -144,7 +149,7 @@ const button_css = {'color': '#fff',
     containerCopyUrl.appendTo(containerMain);
     containerRowReport.appendTo(containerMain);
 
-    containerMain.appendTo($('.comments__add'));
+    containerMain.appendTo($(APPEND_ROWREPORT_ELEMENT));
 
     //ADD GREETINGS
     //wait for iframe with text editor
@@ -152,14 +157,19 @@ const button_css = {'color': '#fff',
       const iframe = document.querySelector('.fr-iframe');
       const doc = iframe && iframe.contentDocument;
       const textAreaEditor = doc && doc.querySelector('body');
-      if (!textAreaEditor) {
-        setTimeout(poll, 200);
+      
+      if (!textAreaEditor) { 
+        setTimeout(poll, 500);
         return;
       }
-
-      if (textAreaEditor.innerHTML.length < 21) {
+      
+      //change style to buttons ПРИНЯТЬ/ОТКЛОНИТЬ
+       addGlobalStyle(".ui-skb-button--view-2 {background-color: #f66a6a;} .ui-skb-button--view-3.ng-star-inserted{background-color: #7ef9a3;}");
+     
+    if (textAreaEditor.innerHTML.length < 21) {
         appendGreetingTo(textAreaEditor);
-      }
+     } 
+    
     });
 
     //show float panel for editor
@@ -213,12 +223,10 @@ const button_css = {'color': '#fff',
   }
 
   function appendGreetingTo(textAreaEditor) {
-    const teacher_name = $('.header__user-name')[0].innerHTML.trim().split('&nbsp;')[0].trim();
     $('<p>', {text: GREETING_TITLE}).appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
-    $('<p>', {text: GREETING_FOOTER + teacher_name}).appendTo(textAreaEditor);
-    document.querySelector('.fr-iframe').contentDocument.querySelector('.fr-view').firstElementChild.remove()
+    $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
   }
 
 })(window);
