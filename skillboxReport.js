@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.40
+// @version 0.41
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -25,7 +25,12 @@ const button_css = {'color': '#fff',
       'padding': '8px 20px'
     };
 
+const sendel_row = {'margin': '10px 30px'};
+
 var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
+
+const SELECTOR_APPROVE_BUTTON = '.form__action.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success.ng-star-inserted'; // принять
+const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger.ng-star-inserted'; // отклонить
 
 (function (window, undefined) {
 
@@ -46,34 +51,26 @@ var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
   function generateResultAndCopyToBuffer(student, module, result, course) {
     const reportElement = $('#report');
-    reportElement.val(
-        todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
-        + window.location.href + "\t" + course)
+    reportElement.val(todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
+        + window.location.href)
+    //    reportElement.val(todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
+    //    + window.location.href + "\t" + course)
     reportElement.select();
     document.execCommand("copy");
   }
 
-function approveHomework() {
-    //Клик на ОТПРАВИТЬ
-    setTimeout(function () {
-      $('.ui-skb-button--view-1.ng-star-inserted').trigger('click');
-    }, 1000);
-    //Клик на ПРИНЯТЬ
-    setTimeout(function () {
-      $('.ui-skb-button--view-3.ng-star-inserted').trigger('click');
-    }, 3000);
+  function approveHomework() {
+    clickOnElement(SELECTOR_APPROVE_BUTTON, 500);
   }
 
   function rejectHomework() {
-    //Клик на ОТПРАВИТЬ
-    setTimeout(function () {
-      $('.ui-skb-button--view-1.ng-star-inserted').trigger('click');
-    }, 1000);
-
-     //Клик на ОТКЛОНИТЬ
-    setTimeout(function () {
-      $('.ui-skb-button--view-2.ng-star-inserted').trigger('click');
-    }, 3000);
+    clickOnElement(SELECTOR_REJECT_BUTTON, 500);
+  }
+  
+  function clickOnElement(selector, timeout){
+        setTimeout(function () {
+      $(selector).trigger('click');
+    }, timeout);
   }
 
   function generateReportRow(content) {
@@ -148,7 +145,8 @@ function approveHomework() {
     $('<hr>').appendTo(containerMain);
     containerCopyUrl.appendTo(containerMain);
     containerRowReport.appendTo(containerMain);
-
+    
+    containerMain.css(sendel_row);
     containerMain.appendTo($(APPEND_ROWREPORT_ELEMENT));
 
     //ADD GREETINGS
@@ -162,9 +160,6 @@ function approveHomework() {
         setTimeout(poll, 500);
         return;
       }
-      
-      //change style to buttons ПРИНЯТЬ/ОТКЛОНИТЬ
-       addGlobalStyle(".ui-skb-button--view-2 {background-color: #f66a6a;} .ui-skb-button--view-3.ng-star-inserted{background-color: #7ef9a3;}");
      
     if (textAreaEditor.innerHTML.length < 21) {
         appendGreetingTo(textAreaEditor);
