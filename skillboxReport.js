@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.41
+// @version 0.43-22.12.2020
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -16,14 +16,21 @@ var GREETING_TITLE = "Здравствуйте!";
 var GREETING_FOOTER = "С уважением, Константин";
 var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
 
-const button_css = {'color': '#fff',
-      'margin': '0 10px',
-      'display': 'inline-block',
-      'min-width':'20px',
-      'border':'1px solid',
-      'cursor': 'pointer',
-      'padding': '8px 20px'
-    };
+const button_css = 
+      {'color': '#fff',
+       'margin': '0 10px',
+       'display': 'inline-block',
+       'min-width':'20px',
+       'border':'1px solid',
+       'cursor': 'pointer',
+       'padding': '8px 20px'
+      };
+
+// css for unsticky user panel
+const user_panel_remove_sticky_and_paddings = 
+      {'display':'flex',
+       'flex-direction':'row-reverse',
+       'justify-content': 'flex-end'};
 
 const sendel_row = {'margin': '10px 30px'};
 
@@ -33,28 +40,26 @@ const SELECTOR_APPROVE_BUTTON = '.form__action.comments-teacher__button.ui-sb-bu
 const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger.ng-star-inserted'; // отклонить
 
 (function (window, undefined) {
-
   // normalized window
-  var w;
-  if (unsafeWindow != "undefined") {
-    w = unsafeWindow
-  } else {
-    w = window;
-  }
+  var w = unsafeWindow != "undefined" ? unsafeWindow : window;
 
   // do not run in frames
   if (w.self != w.top) {
     return;
   }
-
-  var reportRow = '';
+  
+  // additional url check.
+  // Google Chrome do not treat @match as intended sometimes.
+  if (/https:\/\/go.skillbox.ru\/homeworks\//.test(w.location.href)) {
+    $(document).ready(function () {
+      waitForKeyElements(SELECTOR_APPROVE_BUTTON, generateReportRow);
+    });
+  }
 
   function generateResultAndCopyToBuffer(student, module, result, course) {
     const reportElement = $('#report');
     reportElement.val(todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
-        + window.location.href)
-    //    reportElement.val(todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
-    //    + window.location.href + "\t" + course)
+        + window.location.href + "\t" + course)
     reportElement.select();
     document.execCommand("copy");
   }
@@ -73,15 +78,15 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     }, timeout);
   }
 
-  function generateReportRow(content) {
-    var module_full = $("app-lesson-subheader-title")[0].innerText;
+  function generateReportRow() {
+
+    var module_full = $(".homework-subheader__theme-title")[0].innerText;
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = $(".student__info span")[0].innerText;
-    var course = ""; // html don't contains course name
+    var course = $(".homework-course-info__name")[0].innerText;
     
-    reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
+    var reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
-    //create new HTML elements
     let containerMain = $('<div>', {
       id: 'sendel-container-main'
     });
@@ -164,7 +169,6 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     if (textAreaEditor.innerHTML.length < 21) {
         appendGreetingTo(textAreaEditor);
      } 
-    
     });
 
     //show float panel for editor
@@ -189,32 +193,24 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
 
       gitlabLink.appendTo(document.getElementsByClassName("student__info")[0]);
     }
-  }
+    
+         //remove sticky user panel
+      $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
+      $(".lesson-header-wrapper").css('padding', '5px');
+      $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
+      $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
+      $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
+      $(".fr-toolbar").css('background', '#FF0000');
+      $(".fr-toolbar").css('top', '0');
+      $(".homework-subheader").css('padding', '0px 15px 0px 50px');
+    
 
-  // additional url check.
-  // Google Chrome do not treat @match as intended sometimes.
-  if (/https:\/\/go.skillbox.ru\/homeworks\//.test(w.location.href)) {
-    $(document).ready(function () {
-      waitForKeyElements("div.student", generateReportRow);
-    });
   }
 
   function todayDate() {
     const d = new Date();
     return String(d.getDate()).padStart(2, '0') + "." + String(
         (d.getMonth() + 1)).padStart(2, '0') + "." + d.getFullYear();
-  }
-
-  function addGlobalStyle(css) {
-    var head, style;
-    head = document.getElementsByTagName('head')[0];
-    if (!head) {
-      return;
-    }
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = css;
-    head.appendChild(style);
   }
 
   function appendGreetingTo(textAreaEditor) {
