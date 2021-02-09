@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.43-22.12.2020
+// @version 0.44-02.09.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -82,7 +82,7 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
 
     var module_full = $(".homework-subheader__theme-title")[0].innerText;
     var module = module_full.split(":")[0].replace("Тема ", "");
-    var student = $(".student__info span")[0].innerText;
+    var student = $(".info__fullname")[0].innerText;
     var course = $(".homework-course-info__name")[0].innerText;
     
     var reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
