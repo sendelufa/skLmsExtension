@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
 // @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.44-02.09.2021
+// @version 0.45-01.03.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -80,7 +80,7 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
 
   function generateReportRow() {
 
-    var module_full = $(".homework-subheader__theme-title")[0].innerText;
+    var module_full = $(".homework-subheader__theme-title")[0].innerText.split(".")[0];
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = $(".info__fullname")[0].innerText;
     var course = $(".homework-course-info__name")[0].innerText;
@@ -194,17 +194,25 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
       gitlabLink.appendTo(document.getElementsByClassName("student__info")[0]);
     }
     
-         //remove sticky user panel
-      $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
-      $(".lesson-header-wrapper").css('padding', '5px');
-      $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
-      $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
-      $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
-      $(".fr-toolbar").css('background', '#FF0000');
-      $(".fr-toolbar").css('top', '0');
-      $(".homework-subheader").css('padding', '0px 15px 0px 50px');
+    //remove sticky user panel
+    $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
+    $(".lesson-header-wrapper").css('padding', '5px');
+    $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
+    $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
+    $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
+    $(".homework-subheader").css('padding', '0px 10px 0px 50px');
     
-
+    
+    setTimeout(() => {  
+      // fix toolbar at the top
+      let toolbar = $(".custom-theme.fr-toolbar.fr-top");
+      toolbar.css('top', '0');
+      toolbar.css('z-index', '300');
+      toolbar.css('background', '#F9F9F9');
+      toolbar.css('border-width', '1px 0px 0px');
+      toolbar.css('border-color', '#b3b3b3');
+      toolbar.css('height', '80px');
+    }, 2000);
   }
 
   function todayDate() {
