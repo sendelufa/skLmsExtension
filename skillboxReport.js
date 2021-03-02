@@ -2,9 +2,9 @@
 // @name SkillBoxLessonUrlAndReportRowCopy
 // @description input for copy url
 // @author sendel (telegram @sendel)
-// @require  https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js
-// @require  https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.45-01.03.2021
+// @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
+// @require https://gist.github.com/raw/2625891/waitForKeyElements.js
+// @version 0.50-02.03.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -13,7 +13,7 @@
 // do not spoil the global scope
 
 var GREETING_TITLE = "Здравствуйте!";
-var GREETING_FOOTER = "С уважением, Константин";
+var GREETING_FOOTER = ""; // введите свой текст окончания ответа
 var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
 
 const button_css = 
@@ -55,6 +55,26 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
       waitForKeyElements(SELECTOR_APPROVE_BUTTON, generateReportRow);
     });
   }
+  
+  function addGlobalStyle(css) {
+    var head, style;
+    head = document.getElementsByTagName('head')[0];
+    if (!head) { return; }
+    style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = css;
+    head.appendChild(style);
+  }
+  
+  addGlobalStyle(".over {   background-color: black;\
+  animation-name: greenblink;\
+  animation-duration: 0.5s;\
+  \
+  border: 0px;}\
+  @keyframes greenblink {\
+   0%  {background-color: black;}\
+  25%  {background-color: #7CFC00;}\
+  50%  {background-color: black;}}");
 
   function generateResultAndCopyToBuffer(student, module, result, course) {
     const reportElement = $('#report');
@@ -212,7 +232,44 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
       toolbar.css('border-width', '1px 0px 0px');
       toolbar.css('border-color', '#b3b3b3');
       toolbar.css('height', '80px');
+      addCopyTokenButton();
     }, 2000);
+  }
+  
+  function addCopyTokenButton(){
+    let btnCopy = $('<button>', {
+      text: '🔑',
+      class: 'ui-sb-button--default-circle ui-sb-button--view-circle-1 homework-course-info__button sendel-ct',
+      uisbtooltip: 'Скопировать токен для бота статистики',
+      '_ngcontent-nta-c316':'',
+    });
+    btnCopy.css("border-radius", "10px");
+    btnCopy.css("cursor", "pointer");
+    btnCopy.css("width", "40px");
+    btnCopy.css("height", "40px");
+    
+    btnCopy.click(copyRefreshTokenToClipboard);
+    btnCopy.appendTo(document.getElementsByClassName("homework-course-info__buttons")[0]);
+    
+    $(".ui-sb-button--view-circle-1").css("margin", "2px");
+    
+    btnCopy.click(function() {
+     $(this).addClass('over');
+  });
+  btnCopy.mouseleave(function() {
+    $(this).removeClass('over');
+  });
+    
+  }
+  
+  function copyRefreshTokenToClipboard(){
+    const el = document.createElement('textarea'); 
+    el.value =  localStorage.getItem("x-refresh-token"); 
+    document.body.appendChild(el); 
+    el.select();  
+    document.execCommand('copy');
+    document.body.removeChild(el);
+    $(".homework-course-info__buttons").animate({color: 'red'});
   }
 
   function todayDate() {
