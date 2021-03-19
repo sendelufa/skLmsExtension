@@ -12,7 +12,7 @@
 // wrap the script in a closure (opera, ie)
 // do not spoil the global scope
 
-var GREETING_TITLE = "Здравствуйте!";
+var GREETING_TITLE = "Здравствуйте, ";
 var GREETING_FOOTER = ""; // введите свой текст окончания ответа
 var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
 
@@ -279,9 +279,9 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
   }
 
   function appendGreetingTo(textAreaEditor) {
-    $('<p>', {text: GREETING_TITLE}).appendTo(textAreaEditor);
-    $('<br>').appendTo(textAreaEditor);
-    $('<br>').appendTo(textAreaEditor);
+    var student = $(".info__fullname")[0].innerText;
+    var student_name = student.split(' ')[0].trim();
+    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + GREETING_TITLE + student_name + '!</p>');
     $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
   }
 
