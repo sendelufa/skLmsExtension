@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.50-02.03.2021
+// @version 0.53DM-18.03.2021DM
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -12,9 +12,12 @@
 // wrap the script in a closure (opera, ie)
 // do not spoil the global scope
 
-var GREETING_TITLE = "Здравствуйте!";
-var GREETING_FOOTER = ""; // введите свой текст окончания ответа
-var FLOAT_EDITOR_PANEL = false; //  true - панель форматирования текста будет фиксированная
+const GREETING_TITLE_WITHOUT_NAME = "Здравствуйте!";  //заголовок будет печататься если имя студента не распознано
+const GREETING_TITLE_WITH_NAME = "Здравствуйте, ";    // начало заголовка к которому будет добавлено имя
+const GREETING_FOOTER = "С уважением, ";              // Добавьте свое имя. Если вам не надо прощание, просто оставьте пустые кавычки
+
+const FLOAT_EDITOR_PANEL = true;                     //  true - панель форматирования текста будет фиксированная
+const INSERT_CYRILLYC_NAME_IN_GREETING = true;        // если установлено true, то к GREETING_TITLE добавится имя и !
 
 const button_css = 
       {'color': '#fff',
@@ -187,7 +190,7 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
       }
      
     if (textAreaEditor.innerHTML.length < 21) {
-        appendGreetingTo(textAreaEditor);
+        appendGreetingTo(textAreaEditor, student);
      } 
     });
 
@@ -278,8 +281,16 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
         (d.getMonth() + 1)).padStart(2, '0') + "." + d.getFullYear();
   }
 
-  function appendGreetingTo(textAreaEditor) {
-    $('<p>', {text: GREETING_TITLE}).appendTo(textAreaEditor);
+  function appendGreetingTo(textAreaEditor, studentName) {
+    var title = GREETING_TITLE_WITHOUT_NAME;
+    if (INSERT_CYRILLYC_NAME_IN_GREETING && /[А-Я][а-я]+\s[А-Я][а-я]+/u.test(studentName)){
+      title = GREETING_TITLE_WITH_NAME + studentName.split(" ")[0] + '!';
+    }
+
+    // remove blank line in the textArea
+    document.querySelector('.fr-iframe').contentDocument.querySelector('.fr-view').firstChild.remove();
+    
+    $('<p>', {text: title}).appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
