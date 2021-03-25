@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 0.53DM-18.03.2021DM
+// @version 25.03.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -12,12 +12,13 @@
 // wrap the script in a closure (opera, ie)
 // do not spoil the global scope
 
-const GREETING_TITLE_WITHOUT_NAME = "Здравствуйте!";  //заголовок будет печататься если имя студента не распознано
-const GREETING_TITLE_WITH_NAME = "Здравствуйте, ";    // начало заголовка к которому будет добавлено имя
-const GREETING_FOOTER = "С уважением, ";              // Добавьте свое имя. Если вам не надо прощание, просто оставьте пустые кавычки
+const GREETING_TITLE_WITHOUT_NAME = "Здравствуйте!";
+const GREETING_TITLE_WITH_NAME = "Здравствуйте, ";
+const GREETING_FOOTER = "С уважением!";
 
-const FLOAT_EDITOR_PANEL = true;                     //  true - панель форматирования текста будет фиксированная
-const INSERT_CYRILLYC_NAME_IN_GREETING = true;        // если установлено true, то к GREETING_TITLE добавится имя и !
+const FLOAT_EDITOR_PANEL = false; 							//  true - панель форматирования текста будет фиксированная
+const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
+const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
 
 const button_css = 
       {'color': '#fff',
@@ -72,7 +73,6 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
   addGlobalStyle(".over {   background-color: black;\
   animation-name: greenblink;\
   animation-duration: 0.5s;\
-  \
   border: 0px;}\
   @keyframes greenblink {\
    0%  {background-color: black;}\
@@ -180,7 +180,7 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     //ADD GREETINGS
     //wait for iframe with text editor
     setTimeout(function poll() {
-      const iframe = document.querySelector('.fr-iframe');
+      const iframe = document.querySelector('app-comment-form .fr-iframe');
       const doc = iframe && iframe.contentDocument;
       const textAreaEditor = doc && doc.querySelector('body');
       
@@ -218,12 +218,14 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     }
     
     //remove sticky user panel
-    $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
-    $(".lesson-header-wrapper").css('padding', '5px');
-    $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
-    $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
-    $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
-    $(".homework-subheader").css('padding', '0px 10px 0px 50px');
+    if(COMPACT_HEADER) {
+    	$(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
+    	$(".lesson-header-wrapper").css('padding', '5px');
+    	$(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
+    	$(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
+    	$(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
+    	$(".homework-subheader").css('padding', '0px 10px 0px 50px');
+    }
     
     
     setTimeout(() => {  
@@ -257,7 +259,7 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     $(".ui-sb-button--view-circle-1").css("margin", "2px");
     
     btnCopy.click(function() {
-     $(this).addClass('over');
+      $(this).addClass('over');
   });
   btnCopy.mouseleave(function() {
     $(this).removeClass('over');
@@ -288,9 +290,8 @@ const SELECTOR_REJECT_BUTTON = '.form__action.comments-teacher__button.ui-sb-but
     }
 
     // remove blank line in the textArea
-    document.querySelector('.fr-iframe').contentDocument.querySelector('.fr-view').firstChild.remove();
+    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + title + '</p>');    
     
-    $('<p>', {text: title}).appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
