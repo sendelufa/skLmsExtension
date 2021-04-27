@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 25.03.2021
+// @version 27.04.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -40,8 +40,8 @@ const sendel_row = {'margin': '10px 30px'};
 
 var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
-const SELECTOR_APPROVE_BUTTON = '.form__action.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success'; // принять
-const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
+const SELECTOR_APPROVE_BUTTON = '.form__action.button-wrapper.success.ng-star-inserted'; // принять
+const SELECTOR_REJECT_BUTTON = '.form__action.button-wrapper.danger.ng-star-inserted'; // отклонить
 
 (function (window, undefined) {
   // normalized window
