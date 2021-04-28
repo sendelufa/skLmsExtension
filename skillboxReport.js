@@ -40,8 +40,8 @@ const sendel_row = {'margin': '10px 30px'};
 
 var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
-const SELECTOR_APPROVE_BUTTON = '.form__action.button-wrapper.success.ng-star-inserted'; // принять
-const SELECTOR_REJECT_BUTTON = '.form__action.button-wrapper.danger.ng-star-inserted'; // отклонить
+const SELECTOR_APPROVE_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success'; // принять
+const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
 
 (function (window, undefined) {
   // normalized window
