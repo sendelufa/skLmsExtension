@@ -1,40 +1,38 @@
 // ==UserScript==
-// @name SkillBoxLessonUrlAndReportRowCopy
-// @description input for copy url
+// @name SkillBoxPumpItLMS
+// @description make LMS better
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 27.04.2021
+// @version 24.06.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
 
-// wrap the script in a closure (opera, ie)
-// do not spoil the global scope
-
-const GREETING_TITLE_WITHOUT_NAME = "Здравствуйте!";
-const GREETING_TITLE_WITH_NAME = "Здравствуйте, ";
-const GREETING_FOOTER = "С уважением!";
+const GREETING_TITLE_WITHOUT_NAME = "Добрый день!";
+const GREETING_TITLE_WITH_NAME = "Добрый день, ";
+const GREETING_FOOTER = "Успехов! 🖖";
 
 const FLOAT_EDITOR_PANEL = false; 							//  true - панель форматирования текста будет фиксированная
 const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
 const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
+const HIDE_EMPTY_COURSES = false; 								// если true - курсы без домашних заданий будут скрыты в общем списке
 
-const button_css = 
-      {'color': '#fff',
-       'margin': '0 10px',
-       'display': 'inline-block',
-       'min-width':'20px',
-       'border':'1px solid',
-       'cursor': 'pointer',
-       'padding': '8px 20px'
-      };
+const button_css =
+    {'color': '#fff',
+      'margin': '0 10px',
+      'display': 'inline-block',
+      'min-width':'20px',
+      'border':'1px solid',
+      'cursor': 'pointer',
+      'padding': '8px 20px'
+    };
 
 // css for unsticky user panel
-const user_panel_remove_sticky_and_paddings = 
-      {'display':'flex',
-       'flex-direction':'row-reverse',
-       'justify-content': 'flex-end'};
+const user_panel_remove_sticky_and_paddings =
+    {'display':'flex',
+      'flex-direction':'row-reverse',
+      'justify-content': 'flex-end'};
 
 const sendel_row = {'margin': '10px 30px'};
 
@@ -42,6 +40,8 @@ var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
 const SELECTOR_APPROVE_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success'; // принять
 const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
+
+const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки курса на проверку
 
 (function (window, undefined) {
   // normalized window
@@ -51,15 +51,26 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
   if (w.self != w.top) {
     return;
   }
-  
+
   // additional url check.
   // Google Chrome do not treat @match as intended sometimes.
-  if (/https:\/\/go.skillbox.ru\/homeworks\//.test(w.location.href)) {
+  if (/https:\/\/go.skillbox.ru\/homeworks/.test(w.location.href)) {
     $(document).ready(function () {
       waitForKeyElements(SELECTOR_APPROVE_BUTTON, generateReportRow);
+
+      if(HIDE_EMPTY_COURSES){
+        waitForKeyElements(HOMEWORK_PANELS_LIST, hideCoursesWithZeroHomeworks);
+      }
     });
   }
-  
+
+  function hideCoursesWithZeroHomeworks(item) {
+    let statusToCheck = $(item).find('.description__wait').text();
+    if (statusToCheck == 'На проверку: 0'){
+      $(item).hide();
+    }
+  }
+
   function addGlobalStyle(css) {
     var head, style;
     head = document.getElementsByTagName('head')[0];
@@ -69,7 +80,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
     style.innerHTML = css;
     head.appendChild(style);
   }
-  
+
   addGlobalStyle(".over {   background-color: black;\
   animation-name: greenblink;\
   animation-duration: 0.5s;\
@@ -94,9 +105,9 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
   function rejectHomework() {
     clickOnElement(SELECTOR_REJECT_BUTTON, 500);
   }
-  
+
   function clickOnElement(selector, timeout){
-        setTimeout(function () {
+    setTimeout(function () {
       $(selector).trigger('click');
     }, timeout);
   }
@@ -107,7 +118,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = $(".info__fullname")[0].innerText;
     var course = $(".homework-course-info__name")[0].innerText;
-    
+
     var reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
     let containerMain = $('<div>', {
@@ -133,7 +144,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
 
     rework.css({'backgroundColor': '#f84949'});
     rework.css(button_css);
-    
+
     done.appendTo(containerRowReport)
     rework.appendTo(containerRowReport)
 
@@ -152,28 +163,28 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
 
     //Обработка кликов на кнопки зачет/незачет
     done.click(function () {
-     var result = 'зачет';
+      var result = 'зачет';
       generateResultAndCopyToBuffer(student, module, result, course)
       approveHomework();
     });
 
     rework.click(function () {
-     var result = 'незачет';
+      var result = 'незачет';
       generateResultAndCopyToBuffer(student, module, result, course)
       rejectHomework();
     });
 
     //appends to containers
     $('<span>', {text: 'Строка для отчета: '})
-          .css({'display': 'block'})
-		  .appendTo(containerRowReport);
+    .css({'display': 'block'})
+    .appendTo(containerRowReport);
     inputCopyRowToReport
-          .appendTo(containerRowReport);
+    .appendTo(containerRowReport);
 
     $('<hr>').appendTo(containerMain);
     containerCopyUrl.appendTo(containerMain);
     containerRowReport.appendTo(containerMain);
-    
+
     containerMain.css(sendel_row);
     containerMain.appendTo($(APPEND_ROWREPORT_ELEMENT));
 
@@ -183,15 +194,15 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
       const iframe = document.querySelector('app-comment-form .fr-iframe');
       const doc = iframe && iframe.contentDocument;
       const textAreaEditor = doc && doc.querySelector('body');
-      
-      if (!textAreaEditor) { 
+
+      if (!textAreaEditor) {
         setTimeout(poll, 500);
         return;
       }
-     
-    if (textAreaEditor.innerHTML.length < 21) {
+
+      if (textAreaEditor.innerHTML.length < 21) {
         appendGreetingTo(textAreaEditor, student);
-     } 
+      }
     });
 
     //show float panel for editor
@@ -216,19 +227,19 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
 
       gitlabLink.appendTo(document.getElementsByClassName("student__info")[0]);
     }
-    
+
     //remove sticky user panel
     if(COMPACT_HEADER) {
-    	$(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
-    	$(".lesson-header-wrapper").css('padding', '5px');
-    	$(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
-    	$(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
-    	$(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
-    	$(".homework-subheader").css('padding', '0px 10px 0px 50px');
+      $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
+      $(".lesson-header-wrapper").css('padding', '5px');
+      $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
+      $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
+      $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
+      $(".homework-subheader").css('padding', '0px 10px 0px 50px');
     }
-    
-    
-    setTimeout(() => {  
+
+
+    setTimeout(() => {
       // fix toolbar at the top
       let toolbar = $(".custom-theme.fr-toolbar.fr-top");
       toolbar.css('top', '0');
@@ -240,7 +251,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
       addCopyTokenButton();
     }, 2000);
   }
-  
+
   function addCopyTokenButton(){
     let btnCopy = $('<button>', {
       text: '🔑',
@@ -252,26 +263,26 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
     btnCopy.css("cursor", "pointer");
     btnCopy.css("width", "40px");
     btnCopy.css("height", "40px");
-    
+
     btnCopy.click(copyRefreshTokenToClipboard);
     btnCopy.appendTo(document.getElementsByClassName("homework-course-info__buttons")[0]);
-    
+
     $(".ui-sb-button--view-circle-1").css("margin", "2px");
-    
+
     btnCopy.click(function() {
       $(this).addClass('over');
-  });
-  btnCopy.mouseleave(function() {
-    $(this).removeClass('over');
-  });
-    
+    });
+    btnCopy.mouseleave(function() {
+      $(this).removeClass('over');
+    });
+
   }
-  
+
   function copyRefreshTokenToClipboard(){
-    const el = document.createElement('textarea'); 
-    el.value =  localStorage.getItem("x-refresh-token"); 
-    document.body.appendChild(el); 
-    el.select();  
+    const el = document.createElement('textarea');
+    el.value =  localStorage.getItem("x-refresh-token");
+    document.body.appendChild(el);
+    el.select();
     document.execCommand('copy');
     document.body.removeChild(el);
     $(".homework-course-info__buttons").animate({color: 'red'});
@@ -290,8 +301,8 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
     }
 
     // remove blank line in the textArea
-    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + title + '</p>');    
-    
+    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + title + '</p>');
+
     $('<br>').appendTo(textAreaEditor);
     $('<br>').appendTo(textAreaEditor);
     $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
