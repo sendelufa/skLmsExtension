@@ -43,7 +43,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
 
 const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки курса на проверку
 
-(function (window, undefined) {
+document.addEventListener('DOMContentLoaded', function () {
   // normalized window
   var w = unsafeWindow != "undefined" ? unsafeWindow : window;
 
@@ -308,4 +308,4 @@ const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки �
     $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
   }
 
-})(window);
+});
