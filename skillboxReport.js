@@ -4,10 +4,13 @@
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 24.06.2021
+// @version 25.06.2021
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
+
+// wrap the script in a closure (opera, ie)
+// do not spoil the global scope
 
 const GREETING_TITLE_WITHOUT_NAME = "Добрый день!";
 const GREETING_TITLE_WITH_NAME = "Добрый день, ";
@@ -16,7 +19,7 @@ const GREETING_FOOTER = "Успехов! 🖖";
 const FLOAT_EDITOR_PANEL = false; 							//  true - панель форматирования текста будет фиксированная
 const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
 const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
-const HIDE_EMPTY_COURSES = false; 								// если true - курсы без домашних заданий будут скрыты в общем списке
+const HIDE_EMPTY_COURSES = true; 								// если true - курсы без домашних заданий будут скрыты в общем списке
 
 const button_css =
     {'color': '#fff',
@@ -26,6 +29,11 @@ const button_css =
       'border':'1px solid',
       'cursor': 'pointer',
       'padding': '8px 20px'
+    };
+
+const button_settings =
+    {'background-color': 'cadetblue',
+      'font-size': '1rem'
     };
 
 // css for unsticky user panel
@@ -42,6 +50,7 @@ const SELECTOR_APPROVE_BUTTON = '.comments-teacher__button.ui-sb-button--small.u
 const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
 
 const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки курса на проверку
+const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
 
 (function (window, undefined) {
   // normalized window
@@ -56,6 +65,9 @@ const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки �
   // Google Chrome do not treat @match as intended sometimes.
   if (/https:\/\/go.skillbox.ru\/homeworks/.test(w.location.href)) {
     $(document).ready(function () {
+
+      waitForKeyElements(HOMEWORK_TITLE_LIST_CLASS, appendSettingsButton);
+
       waitForKeyElements(SELECTOR_APPROVE_BUTTON, generateReportRow);
 
       if(HIDE_EMPTY_COURSES){
@@ -68,6 +80,41 @@ const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки �
     let statusToCheck = $(item).find('.description__wait').text();
     if (statusToCheck == 'На проверку: 0'){
       $(item).hide();
+    }
+  }
+
+  function appendSettingsButton(item) {
+
+    let settingsButton = $('<input>', {
+      innerHTML: '⚙ LMS скрипта',
+      class: 'sendel_input',
+      type: 'checkbox',
+      id: 'hide_empty_hw_checkbox',
+    });
+
+    settingsButton.css(button_css);
+    settingsButton.css(button_settings);
+
+    settingsButton.on('click', toggleShowEmptyCourses);
+
+    const container = $('<div>', {id:'lms_settings'})
+    .append(settingsButton)
+    .append($('<label>', {for:'hide_empty_hw_checkbox', text: 'Показаны курсы без домашних работ'}));
+
+    container.insertAfter(item);
+
+    item.hide();
+  }
+
+  function toggleShowEmptyCourses() {
+    const checkboxShowEmptyCourses = $('#hide_empty_hw_checkbox');
+
+    if (checkboxShowEmptyCourses.is(':checked')){
+      console.log('checked');
+      $(HOMEWORK_PANELS_LIST).show();
+    }else {
+      console.log('unchecked');
+      $(HOMEWORK_PANELS_LIST).each(function () { hideCoursesWithZeroHomeworks($(this)) });
     }
   }
 
