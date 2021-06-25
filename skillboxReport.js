@@ -21,28 +21,25 @@ const COMPACT_HEADER = true; 										// если true - заголовок р�
 const HIDE_EMPTY_COURSES = true; 								// если true - курсы без домашних заданий будут скрыты в общем списке
 const HIDE_REPORT_ROW = true; 								// если true - строка для отчета не будет показываться
 
-const button_css =
-    {'color': '#fff',
-      'margin': '0 10px',
-      'display': 'inline-block',
-      'min-width':'20px',
-      'border':'1px solid',
-      'cursor': 'pointer',
-      'padding': '8px 20px'
-    };
+const button_css = {
+  'color': '#fff', 'margin': '0 10px',
+  'display': 'inline-block', 'min-width': '20px', 'border': '1px solid',
+  'cursor': 'pointer', 'padding': '8px 20px'
+};
 
-const button_settings =
-    {'background-color': 'cadetblue',
-      'font-size': '1rem'
-    };
+const button_settings = {
+  'background-color': 'cadetblue',
+  'font-size': '1rem'
+};
 
 // css for unsticky user panel
-const user_panel_remove_sticky_and_paddings =
-    {'display':'flex',
-      'flex-direction':'row-reverse',
-      'justify-content': 'flex-end'};
+const user_panel_remove_sticky_and_paddings = {
+  'display': 'flex',
+  'flex-direction': 'row-reverse',
+  'justify-content': 'flex-end'
+};
 
-const sendel_row = {'margin': '10px 30px'};
+const sendel_row = { 'margin': '10px 30px' };
 
 var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
@@ -51,6 +48,7 @@ const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui
 
 const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки курса на проверку
 const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
+const HIDE_EMPTY_HW_CHECKBOX_CLASS = 'hide_empty_hw_checkbox';
 
 (function (window, undefined) {
   // normalized window
@@ -68,75 +66,11 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
       waitForKeyElements(HOMEWORK_TITLE_LIST_CLASS, appendSettingsButton);
       waitForKeyElements(SELECTOR_APPROVE_BUTTON, pumpIt);
 
-      if(HIDE_EMPTY_COURSES){
+      if (HIDE_EMPTY_COURSES) {
         waitForKeyElements(HOMEWORK_PANELS_LIST, hideCoursesWithZeroHomeworks);
       }
-    });
-  }
 
-  function pumpIt(){
-    if (!HIDE_REPORT_ROW) {
-      generateReportRow();
-    }
-
-    addGreeting();
-    fixFloatPanel();
-    addGitlabSearchButton();
-    bakeHeader();
-  }
-
-  function hideCoursesWithZeroHomeworks(item) {
-    let statusToCheck = $(item).find('.description__wait').text();
-    if (statusToCheck == 'На проверку: 0'){
-      $(item).hide();
-    }
-  }
-
-  function appendSettingsButton(item) {
-
-    let settingsButton = $('<input>', {
-      innerHTML: '⚙ LMS скрипта',
-      class: 'sendel_input',
-      type: 'checkbox',
-      id: 'hide_empty_hw_checkbox',
-    });
-
-    settingsButton.css(button_css)
-      .css(button_settings)
-      .on('click', toggleShowEmptyCourses);
-
-    const container = $('<div>', {id:'lms_settings'})
-    .append(settingsButton)
-    .append($('<label>', {for:'hide_empty_hw_checkbox', text: 'Показаны курсы без домашних работ'}));
-
-    container.insertAfter(item);
-
-    item.hide();
-  }
-
-  function toggleShowEmptyCourses() {
-    const checkboxShowEmptyCourses = $('#hide_empty_hw_checkbox');
-
-    if (checkboxShowEmptyCourses.is(':checked')){
-      console.log('checked');
-      $(HOMEWORK_PANELS_LIST).show();
-    }else {
-      console.log('unchecked');
-      $(HOMEWORK_PANELS_LIST).each(function () { hideCoursesWithZeroHomeworks($(this)) });
-    }
-  }
-
-  function addGlobalStyle(css) {
-    var head, style;
-    head = document.getElementsByTagName('head')[0];
-    if (!head) { return; }
-    style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = css;
-    head.appendChild(style);
-  }
-
-  addGlobalStyle(".over {   background-color: black;\
+      addGlobalStyle(".over {   background-color: black;\
   animation-name: greenblink;\
   animation-duration: 0.5s;\
   border: 0px;}\
@@ -144,73 +78,97 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
    0%  {background-color: black;}\
   25%  {background-color: #7CFC00;}\
   50%  {background-color: black;}}");
+    });
+  }
+
+  function pumpIt() {
+    if (!HIDE_REPORT_ROW) {
+      generateReportRow();
+    }
+
+    addGreeting();
+    compactHomeworkTitle();
+    bakeHeader();
+  }
+
+  function hideCoursesWithZeroHomeworks(item) {
+    let statusToCheck = $(item).find('.description__wait').text();
+    if (statusToCheck == 'На проверку: 0') {
+      $(item).hide();
+    }
+  }
+
+  function appendSettingsButton(item) {
+    let settingsButton = $('<input>', {
+      class: 'sendel_input',
+      type: 'checkbox',
+      id: HIDE_EMPTY_HW_CHECKBOX_CLASS,
+    })
+      .css(button_css)
+      .css(button_settings)
+      .click(toggleShowEmptyCourses);
+
+    $('<div>', { id: 'lms_settings' })
+      .append(settingsButton)
+      .append($('<label>', { for: HIDE_EMPTY_HW_CHECKBOX_CLASS, text: 'Показаны курсы без домашних работ' }))
+      .insertAfter(item);
+
+    item.hide();
+  }
+
+  function toggleShowEmptyCourses() {
+    const checkboxShowEmptyCourses = $('#' + HIDE_EMPTY_HW_CHECKBOX_CLASS);
+
+    if (checkboxShowEmptyCourses.is(':checked')) {
+      $(HOMEWORK_PANELS_LIST).show();
+    } else {
+      $(HOMEWORK_PANELS_LIST).each(function () { hideCoursesWithZeroHomeworks($(this)) });
+    }
+  }
+
+  function addGlobalStyle(css) {
+    $('head').append($('<style>', { type: 'text/css', text: css }));
+  }
 
   function generateResultAndCopyToBuffer(student, module, result, course) {
-    const reportElement = $('#report');
-    reportElement.val(todayDate() + "\t" + student + "\t" + module + "\t" + result + "\t"
-        + window.location.href + "\t" + course)
-    reportElement.select();
+    $('#report')
+      .val([todayDateFormatted(), student, module, result, window.location.href, course].join("\t"))
+      .select();
     document.execCommand("copy");
   }
 
-  function approveHomework() {
-    clickOnElement(SELECTOR_APPROVE_BUTTON, 500);
-  }
+  let approveHomework = () => clickOnElement(SELECTOR_APPROVE_BUTTON, 500);
+  let rejectHomework = () => clickOnElement(SELECTOR_REJECT_BUTTON, 500);
 
-  function rejectHomework() {
-    clickOnElement(SELECTOR_REJECT_BUTTON, 500);
-  }
+  let clickOnElement = (selector, timeout) => setTimeout(
+    () => $(selector).trigger('click'), timeout);
 
-  function clickOnElement(selector, timeout){
-    setTimeout(function () {
-      $(selector).trigger('click');
-    }, timeout);
-  }
-
-  function getStudentName(){
-    return $(".info__fullname")[0].innerText;
-
-  }
+  let getStudentName = () => $(".info__fullname")[0].innerText;
 
   function generateReportRow() {
-
     var module_full = $(".homework-subheader__theme-title")[0].innerText.split(".")[0];
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = getStudentName();
     var course = $(".homework-course-info__name")[0].innerText;
 
+    var reportRow = todayDateFormatted() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
-    var reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
-
-    let containerMain = $('<div>', {
-      id: 'sendel-container-main'
-    });
-    let containerRowReport = $('<div>', {
-      id: 'sendel-copy-row'
-    });
-    let containerCopyUrl = $('<div>', {
-      id: 'sendel-p-copy-url'
-    });
-    let done = $('<button>', {
-      text: '👍 зачет',
-      class: 'skillbox-btn'
-    });
-    let rework = $('<button>', {
-      text: '✖️ незачет',
-      class: 'skillbox-btn'
-    });
-
-    done.css({'backgroundColor': '#2fa52f'});
-    done.css(button_css);
-
-    rework.css({'backgroundColor': '#f84949'});
-    rework.css(button_css);
+    let containerMain = $('<div>', { id: 'sendel-container-main' });
+    let containerRowReport = $('<div>', { id: 'sendel-copy-row' });
+    let containerCopyUrl = $('<div>', { id: 'sendel-p-copy-url' });
+    let done = $('<button>', { text: '👍 зачет', class: 'skillbox-btn' })
+      .css({ 'backgroundColor': '#2fa52f' })
+      .css(button_css);
+    let rework = $('<button>', { text: '✖️ незачет', class: 'skillbox-btn' })
+      .css({ 'backgroundColor': '#f84949' })
+      .css(button_css);
 
     done.appendTo(containerRowReport)
     rework.appendTo(containerRowReport)
 
     let inputCopyRowToReport = $('<input>', {
       type: 'text',
+      id: 'report',
       value: reportRow,
       name: 'sendel-copy-row',
       click: function () {
@@ -218,9 +176,8 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
         document.execCommand("copy");
         $('#sendel-copy-row').append('  строка для отчета скопирована!');
       }
-    });
-    inputCopyRowToReport.css({"width": "100%", 'margin-bottom': '10px'});
-    inputCopyRowToReport.attr('id', 'report')
+    })
+      .css({ "width": "100%", 'margin-bottom': '10px' });
 
     //Обработка кликов на кнопки зачет/незачет
     done.click(function () {
@@ -236,11 +193,10 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
     });
 
     //appends to containers
-    $('<span>', {text: 'Строка для отчета: '})
-    .css({'display': 'block'})
-    .appendTo(containerRowReport);
-    inputCopyRowToReport
-    .appendTo(containerRowReport);
+    $('<span>', { text: 'Строка для отчета: ' })
+      .css({ 'display': 'block' })
+      .appendTo(containerRowReport);
+    inputCopyRowToReport.appendTo(containerRowReport);
 
     $('<hr>').appendTo(containerMain);
     containerCopyUrl.appendTo(containerMain);
@@ -248,13 +204,9 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
 
     containerMain.css(sendel_row);
     containerMain.appendTo($(APPEND_ROWREPORT_ELEMENT));
-
   }
 
-  function addGreeting(){
-    console.log("addGreeting start...");
-    //ADD GREETINGS
-    //wait for iframe with text editor
+  function addGreeting() {
     setTimeout(function poll() {
       const iframe = document.querySelector('app-comment-form .fr-iframe');
       const doc = iframe && iframe.contentDocument;
@@ -266,104 +218,82 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
       }
 
       if (textAreaEditor.innerHTML.length < 21) {
-        appendGreetingTo(textAreaEditor,getStudentName());
+        appendGreetingTo(textAreaEditor, getStudentName());
       }
     });
-
   }
 
-  function addGitlabSearchButton(){
+  function addGitlabSearchButton() {
     let student = getStudentName();
     if (student) {
       let gitlabUrl = "https://gitlab.skillbox.ru/search?group_id=&project_id=&repository_ref=&scope=users&search=" + student.replace(" ", "+");
-      let gitlabLink = $('<a>', {
+      $('<a>', {
         text: 'Search ' + student + ' in Gitlab',
         class: 'info__status skb-p3',
         href: gitlabUrl,
         target: '_blank'
-      });
-
-      gitlabLink.appendTo($(".student__info"));
+      }).appendTo($(".student__info"));
     }
   }
 
-  function fixFloatPanel(){
-      $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
-      $(".lesson-header-wrapper").css('padding', '5px');
-      $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
-      $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
-      $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
-      $(".homework-subheader").css('padding', '0px 10px 0px 50px');
-  }
 
-  function bakeHeader(){
+  function bakeHeader() {
     setTimeout(() => {
-      // fix toolbar at the top
-      let toolbar = $(".custom-theme.fr-toolbar.fr-top");
-      toolbar.css('top', '0');
-      toolbar.css('z-index', '300');
-      toolbar.css('background', '#F9F9F9');
-      toolbar.css('border-width', '1px 0px 0px');
-      toolbar.css('border-color', '#b3b3b3');
-      toolbar.css('height', '80px');
+      compactHomeworkTitle();
       addCopyTokenButton();
+      addGitlabSearchButton();
     }, 2000);
   }
 
-  function addCopyTokenButton(){
-    let btnCopy = $('<button>', {
+  function compactHomeworkTitle() {
+    $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
+    $(".lesson-header-wrapper").css('padding', '5px');
+    $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
+    $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
+    $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
+    $(".homework-subheader").css('padding', '0px 10px 0px 50px');
+  }
+
+  function addCopyTokenButton() {
+    $('<button>', {
       text: '🔑',
       class: 'ui-sb-button--default-circle ui-sb-button--view-circle-1 homework-course-info__button sendel-ct',
-      uisbtooltip: 'Скопировать токен для бота статистики',
-      '_ngcontent-nta-c316':'',
-    });
-    btnCopy.css("border-radius", "10px");
-    btnCopy.css("cursor", "pointer");
-    btnCopy.css("width", "40px");
-    btnCopy.css("height", "40px");
-
-    btnCopy.click(copyRefreshTokenToClipboard);
-    btnCopy.appendTo(document.getElementsByClassName("homework-course-info__buttons")[0]);
+      uisbtooltip: 'Скопировать токен для бота статистики', '_ngcontent-nta-c316': '',
+    })
+      .css({
+        "border-radius": "10px",
+        "cursor": "pointer",
+        "width": "40px",
+        "height": "40px",
+      })
+      .click(copyRefreshTokenToClipboard)
+      .click(function () { $(this).addClass('over'); })
+      .mouseleave(function () { $(this).removeClass('over'); })
+      .appendTo($(".homework-course-info__buttons"));
 
     $(".ui-sb-button--view-circle-1").css("margin", "2px");
-
-    btnCopy.click(function() {
-      $(this).addClass('over');
-    });
-    btnCopy.mouseleave(function() {
-      $(this).removeClass('over');
-    });
-
   }
 
-  function copyRefreshTokenToClipboard(){
-    const el = document.createElement('textarea');
-    el.value =  localStorage.getItem("x-refresh-token");
-    document.body.appendChild(el);
+  function copyRefreshTokenToClipboard() {
+    const el = $('<textarea>', {
+      text: localStorage.getItem("x-refresh-token")
+    });
+
+    $('body').append(el);
     el.select();
     document.execCommand('copy');
-    document.body.removeChild(el);
-    $(".homework-course-info__buttons").animate({color: 'red'});
+    el.remove();
   }
 
-  function todayDate() {
-    const d = new Date();
-    return String(d.getDate()).padStart(2, '0') + "." + String(
-        (d.getMonth() + 1)).padStart(2, '0') + "." + d.getFullYear();
+  function todayDateFormatted() {
+    return new Date().toLocaleDateString('ru-RU');
   }
 
   function appendGreetingTo(textAreaEditor, studentName) {
-    var title = GREETING_TITLE_WITHOUT_NAME;
-    if (INSERT_CYRILLYC_NAME_IN_GREETING && /[А-Я][а-я]+\s[А-Я][а-я]+/u.test(studentName)){
-      title = GREETING_TITLE_WITH_NAME + studentName.split(" ")[0] + '!';
-    }
+    var title = INSERT_CYRILLYC_NAME_IN_GREETING && /[А-Я][а-я]+\s[А-Я][а-я]+/u.test(studentName) ?
+      GREETING_TITLE_WITH_NAME + studentName.split(" ")[0] + '!' : GREETING_TITLE_WITHOUT_NAME;
 
-    // remove blank line in the textArea
-    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + title + '</p>');
-
-    $('<br>').appendTo(textAreaEditor);
-    $('<br>').appendTo(textAreaEditor);
-    $('<p>', {text: GREETING_FOOTER}).appendTo(textAreaEditor);
+    textAreaEditor.insertAdjacentHTML('afterbegin', '<p>' + title +
+      '</p><br/><br/><p>' + GREETING_FOOTER + '</p>');
   }
-
 })(window);
