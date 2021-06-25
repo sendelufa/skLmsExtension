@@ -16,10 +16,10 @@ const GREETING_TITLE_WITHOUT_NAME = "Добрый день!";
 const GREETING_TITLE_WITH_NAME = "Добрый день, ";
 const GREETING_FOOTER = "Успехов! 🖖";
 
-const FLOAT_EDITOR_PANEL = false; 							//  true - панель форматирования текста будет фиксированная
 const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
 const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
 const HIDE_EMPTY_COURSES = true; 								// если true - курсы без домашних заданий будут скрыты в общем списке
+const HIDE_REPORT_ROW = true; 								// если true - строка для отчета не будет показываться
 
 const button_css =
     {'color': '#fff',
@@ -65,15 +65,24 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
   // Google Chrome do not treat @match as intended sometimes.
   if (/https:\/\/go.skillbox.ru\/homeworks/.test(w.location.href)) {
     $(document).ready(function () {
-
       waitForKeyElements(HOMEWORK_TITLE_LIST_CLASS, appendSettingsButton);
-
-      waitForKeyElements(SELECTOR_APPROVE_BUTTON, generateReportRow);
+      waitForKeyElements(SELECTOR_APPROVE_BUTTON, pumpIt);
 
       if(HIDE_EMPTY_COURSES){
         waitForKeyElements(HOMEWORK_PANELS_LIST, hideCoursesWithZeroHomeworks);
       }
     });
+  }
+
+  function pumpIt(){
+    if (!HIDE_REPORT_ROW) {
+      generateReportRow();
+    }
+
+    addGreeting();
+    fixFloatPanel();
+    addGitlabSearchButton();
+    bakeHeader();
   }
 
   function hideCoursesWithZeroHomeworks(item) {
@@ -92,10 +101,9 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
       id: 'hide_empty_hw_checkbox',
     });
 
-    settingsButton.css(button_css);
-    settingsButton.css(button_settings);
-
-    settingsButton.on('click', toggleShowEmptyCourses);
+    settingsButton.css(button_css)
+      .css(button_settings)
+      .on('click', toggleShowEmptyCourses);
 
     const container = $('<div>', {id:'lms_settings'})
     .append(settingsButton)
@@ -159,12 +167,18 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
     }, timeout);
   }
 
+  function getStudentName(){
+    return $(".info__fullname")[0].innerText;
+
+  }
+
   function generateReportRow() {
 
     var module_full = $(".homework-subheader__theme-title")[0].innerText.split(".")[0];
     var module = module_full.split(":")[0].replace("Тема ", "");
-    var student = $(".info__fullname")[0].innerText;
+    var student = getStudentName();
     var course = $(".homework-course-info__name")[0].innerText;
+
 
     var reportRow = todayDate() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
@@ -235,6 +249,10 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
     containerMain.css(sendel_row);
     containerMain.appendTo($(APPEND_ROWREPORT_ELEMENT));
 
+  }
+
+  function addGreeting(){
+    console.log("addGreeting start...");
     //ADD GREETINGS
     //wait for iframe with text editor
     setTimeout(function poll() {
@@ -248,44 +266,37 @@ const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
       }
 
       if (textAreaEditor.innerHTML.length < 21) {
-        appendGreetingTo(textAreaEditor, student);
+        appendGreetingTo(textAreaEditor,getStudentName());
       }
     });
 
-    //show float panel for editor
-    if (FLOAT_EDITOR_PANEL) {
-      let editor_panel = $(".fr-toolbar");
-      editor_panel.css("position", "fixed");
-      editor_panel.css("top", "64px");
-      editor_panel.css("z-index", "500");
-      editor_panel.css("border", "2px");
-      editor_panel.css("boder-color", "#979797");
-      editor_panel.css("border-style", "solid");
-    }
+  }
 
+  function addGitlabSearchButton(){
+    let student = getStudentName();
     if (student) {
       let gitlabUrl = "https://gitlab.skillbox.ru/search?group_id=&project_id=&repository_ref=&scope=users&search=" + student.replace(" ", "+");
       let gitlabLink = $('<a>', {
-        text: 'Gitlab search',
+        text: 'Search ' + student + ' in Gitlab',
         class: 'info__status skb-p3',
         href: gitlabUrl,
         target: '_blank'
       });
 
-      gitlabLink.appendTo(document.getElementsByClassName("student__info")[0]);
+      gitlabLink.appendTo($(".student__info"));
     }
+  }
 
-    //remove sticky user panel
-    if(COMPACT_HEADER) {
+  function fixFloatPanel(){
       $(".lesson-header-wrapper").css(user_panel_remove_sticky_and_paddings);
       $(".lesson-header-wrapper").css('padding', '5px');
       $(".homework-subheader__theme-title").css(user_panel_remove_sticky_and_paddings);
       $(".homework-course-info").css(user_panel_remove_sticky_and_paddings);
       $(".skb-froala-teacher-page-offset-toolbar").css('position', 'relative');
       $(".homework-subheader").css('padding', '0px 10px 0px 50px');
-    }
+  }
 
-
+  function bakeHeader(){
     setTimeout(() => {
       // fix toolbar at the top
       let toolbar = $(".custom-theme.fr-toolbar.fr-top");
