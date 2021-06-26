@@ -1,0 +1,27 @@
+name: Create Archive
+on: 
+  pull_request:
+    types:
+      - labeled
+      - unlabeled
+      - syncronize
+      - opened
+      - edited
+      - ready_for_review
+      - reopened
+      - unlocked
+  check_suite:
+    types:
+      - completed
+  status: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - name: Archive Release
+      uses: thedoctor0/zip-release@master
+      with:
+        filename: 'LMSPumpIt.zip'
+        exclusions: '*.git*'
