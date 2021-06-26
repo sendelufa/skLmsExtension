@@ -25,3 +25,5 @@ jobs:
       with:
         filename: 'LMSPumpIt.zip'
         exclusions: '*.git*'
+        path: 'LMSPumpIt.zip'
+        retention-days: 5
