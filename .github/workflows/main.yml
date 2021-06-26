@@ -1,19 +1,5 @@
 name: Create Archive
-on: 
-  pull_request:
-    types:
-      - labeled
-      - unlabeled
-      - syncronize
-      - opened
-      - edited
-      - ready_for_review
-      - reopened
-      - unlocked
-  check_suite:
-    types:
-      - completed
-  status: {}
+on: [push]
 
 jobs:
   build:
@@ -21,9 +7,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
     - name: Archive Release
-      uses: thedoctor0/zip-release@master
+      uses: ncipollo/release-action@v1
       with:
-        filename: 'LMSPumpIt.zip'
-        exclusions: '*.git*'
-        path: 'LMSPumpIt.zip'
-        retention-days: 5
+        artifacts: "LMSPumpIt.zip"
+        token: ${{ secrets.GITHUB_TOKEN }}
