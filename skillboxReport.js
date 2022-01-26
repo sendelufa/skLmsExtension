@@ -4,7 +4,7 @@
 // @author sendel (telegram @sendel)
 // @require https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js
 // @require https://gist.github.com/raw/2625891/waitForKeyElements.js
-// @version 25.06.2021
+// @version 26.01.2022
 // @include https://go.skillbox.ru/*
 // @grant    GM_addStyle
 // ==/UserScript==
@@ -18,7 +18,7 @@ const GREETING_FOOTER = "Успехов! 🖖";
 
 const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
 const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
-const HIDE_EMPTY_COURSES = true; 								// если true - курсы без домашних заданий будут скрыты в общем списке
+const HIDE_EMPTY_COURSES = false; 								// если true - курсы без домашних заданий будут скрыты в общем списке
 const HIDE_REPORT_ROW = true; 								// если true - строка для отчета не будет показываться
 
 const button_css = {
@@ -208,9 +208,7 @@ const HIDE_EMPTY_HW_CHECKBOX_CLASS = 'hide_empty_hw_checkbox';
 
   function addGreeting() {
     setTimeout(function poll() {
-      const iframe = document.querySelector('app-comment-form .fr-iframe');
-      const doc = iframe && iframe.contentDocument;
-      const textAreaEditor = doc && doc.querySelector('body');
+      const textAreaEditor = document.querySelector("app-comments-teacher .fr-view");
 
       if (!textAreaEditor) {
         setTimeout(poll, 500);
