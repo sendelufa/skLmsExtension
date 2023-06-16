@@ -18,7 +18,7 @@ const GREETING_FOOTER = "Успехов! 🖖";
 
 const INSERT_CYRILLYC_NAME_IN_GREETING = true; 	// если установлено true, то к GREETING_TITLE добавится имя и !
 const COMPACT_HEADER = true; 										// если true - заголовок работы будет компактен
-const HIDE_EMPTY_COURSES = false; 								// если true - курсы без домашних заданий будут скрыты в общем списке
+const HIDE_EMPTY_COURSES = true; 								// если true - курсы без домашних заданий будут скрыты в общем списке
 const HIDE_REPORT_ROW = true; 								// если true - строка для отчета не будет показываться
 
 const button_css = {
@@ -43,8 +43,11 @@ const sendel_row = { 'margin': '10px 30px' };
 
 var APPEND_ROWREPORT_ELEMENT = 'app-comment-form';
 
-const SELECTOR_APPROVE_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success'; // принять
-const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
+//обновление верстки 16.06.23
+//const SELECTOR_APPROVE_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.success'; // принять
+const SELECTOR_APPROVE_BUTTON = 'span.form__action.button-wrapper.success.ng-star-inserted'; // принять
+//const SELECTOR_REJECT_BUTTON = '.comments-teacher__button.ui-sb-button--small.ui-sb-button--default.ui-sb-button--view-1.danger'; // отклонить
+const SELECTOR_REJECT_BUTTON = 'span.form__action.button-wrapper.danger.ng-star-inserted'; // отклонить
 
 const HOMEWORK_PANELS_LIST = '.homeworks-panel-accordion'; // панельки курса на проверку
 const HOMEWORK_TITLE_LIST_CLASS = '.homeworks__header';
@@ -149,7 +152,7 @@ const HIDE_EMPTY_HW_CHECKBOX_CLASS = 'hide_empty_hw_checkbox';
     var module_full = $(".homework-subheader__theme-title")[0].innerText.split(".")[0];
     var module = module_full.split(":")[0].replace("Тема ", "");
     var student = getStudentName();
-    var course = $(".homework-course-info__name")[0].innerText;
+    var course = $("span.homework-course-info__name.ui-sb-14r")[0].innerText;
 
     var reportRow = todayDateFormatted() + "\t" + student + "\t" + module + "\t \t" + window.location.href + "\t" + course;
 
@@ -295,3 +298,4 @@ const HIDE_EMPTY_HW_CHECKBOX_CLASS = 'hide_empty_hw_checkbox';
       '</p><br/><br/><p>' + GREETING_FOOTER + '</p>');
   }
 })(window);
+
