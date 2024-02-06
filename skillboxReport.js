@@ -277,7 +277,9 @@ const HIDE_EMPTY_HW_CHECKBOX_CLASS = 'hide_empty_hw_checkbox';
 
   function copyRefreshTokenToClipboard() {
     const el = $('<textarea>', {
-      text: localStorage.getItem("x-refresh-token")
+      //new token source
+      // text: localStorage.getItem("x-refresh-token")
+      text: localStorage.getItem("refresh-token")
     });
 
     $('body').append(el);
